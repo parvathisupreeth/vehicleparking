@@ -393,6 +393,11 @@ def editlot(lot_id):
 @app.route('/deletelot/<int:lot_id>')
 def deletelot(lot_id):
     lot = ParkingLot.query.get_or_404(lot_id)
+    # Check if any spot (place) in this lot is occupied
+    occupied_count = Place.query.filter_by(lot_id=lot.id, is_reserved=True).count()
+    if occupied_count > 0:
+        flash('Cannot delete: Some spots in this lot are still occupied!', 'danger')
+        return redirect(url_for('editlots'))
     db.session.delete(lot)
     db.session.commit()
     flash('Parking Lot deleted successfully!', 'success')
