@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Parking Lot</title>
+</head>
+<body>
+    <h2>Add Parking Lot</h2>
+    <form method="post">
+        <label>Name:</label><br>
+        <input name="name" required><br><br>
+
+        <label>Address:</label><br>
+        <input name="address" required><br><br>
+
+        <label>Pin Code:</label><br>
+        <input name="pincode" required><br><br>
+
+        <label>Price per Hour:</label><br>
+        <input name="price" type="number" required><br><br>
+
+        <label>Max Spots:</label><br>
+        <input name="max_spots" type="number" required><br><br>
+
+        <input type="submit" value="Add Lot">
+        <a href="{{ url_for('dashboard') }}">🔙  Dashboard</a>
+        <hr>
+
+
+    </form>
+</body>
+</html>

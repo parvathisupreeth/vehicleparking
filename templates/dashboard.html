@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+</head>
+<body>
+    <h2>Welcome, {{ username }}</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div style="color: {% if category == 'success' %}green{% elif category == 'warning' %}orange{% else %}red{% endif %};">
+            <p>{{ message }}</p>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    {% if is_admin %}
+        <h3>Admin Options</h3>
+        <ul>
+            <li><a href="/addlot">Create Parking Lot</a></li>
+            <li><a href="/viewlots">View Lot & Spot Status</a></li>
+            <li><a href="/editlots">Edit/Delete Parking Lots</a></li>
+            <li><a href="{{ url_for('admin_users') }}">User Tracking</a></li>
+            <li><a href="{{ url_for('admin_analytics') }}">Parking Analytics</a></li>
+            <li><a href="{{ url_for('admin_history') }}" class="btn btn-info">View Booking History</a></li>
+
+
+        </ul>
+    {% else %}
+        <h3>User Options</h3>
+        <ul>
+            <li><a href="/viewlots">Reserve a Parking Spot</a></li>
+            <li><a href="/history">View all Bookings </a></li>
+        </ul>
+    {% endif %}
+
+    <br><a href="/logout">Logout</a>
+</body>
+</html>

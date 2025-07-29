@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Reservation History</title>
+</head>
+<body>
+    <h2>Reservation History for {{ session.username }}</h2>
+
+    {% if reservations %}
+        <ul>
+        {% for res in reservations %}
+            <li>
+                🅿️ Lot: <strong>{{ res.lot_name }}</strong> | Place: {{ res.place_number }}<br>
+                🕒 Start: {{ res.start_time }} | End: {{ res.end_time or 'Active' }}<br>
+                💰 Cost/hr: ₹{{ res.cost_per_hour }} | Status: <strong>{{ 'Active' if res.is_active else 'Ended' }}</strong>
+               
+            </li><br>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No reservations found.</p>
+    {% endif %}
+     <br><a href="{{ url_for('dashboard') }}">🔙  Dashboard</a>
+</body>
+</html>

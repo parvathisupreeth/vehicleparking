@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin - Parking Analytics</title>
+    <style>
+        input[type="search"] {
+            margin-bottom: 10px;
+            padding: 5px;
+            width: 300px;
+        }
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        .usage-bar {
+            background-color: #4CAF50;
+            height: 15px;
+            color: white;
+            text-align: center;
+        }
+        .usage-container {
+            width: 100px;
+            border: 1px solid #ddd;
+            background-color: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <h2>Parking Analytics</h2>
+
+    <form method="get" action="{{ url_for('admin_analytics') }}">
+        <input type="search" name="search" placeholder="Search lots by name or location" value="{{ search }}">
+        <button type="submit">Search</button>
+        {% if search %}
+            <a href="{{ url_for('admin_analytics') }}">Clear</a>
+        {% endif %}
+    </form>
+
+    {% if lots %}
+        <h3>Parking Lot Usage Summary</h3>
+        <ul>
+            {% for lot in lots %}
+                <li><strong>{{ lot.name }}</strong>: {{ lot.usage_percent }}% occupied ({{ lot.occupied }}/{{ lot.capacity }})</li>
+            {% endfor %}
+        </ul>
+
+        <h3>Parking Lots Details</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Location</th>
+                    <th>Capacity</th>
+                    <th>Available</th>
+                    <th>Cost per hour (₹)</th>
+                    <th>Usage %</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lot in lots %}
+                <tr>
+                    <td>{{ lot.name }}</td>
+                    <td>{{ lot.location }}</td>
+                    <td>{{ lot.capacity }}</td>
+                    <td>{{ lot.available }}</td>
+                    <td>{{ lot.cost }}</td>
+                    <td>
+                        <div class="usage-container">
+                            <div class="usage-bar" style="width:{{ lot.usage_percent }}%;">{{ lot.usage_percent }}%</div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No parking lots found.</p>
+    {% endif %}
+    <a href="{{ url_for('dashboard') }}">🔙  Dashboard</a>
+</body>
+</html>

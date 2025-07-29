@@ -1,0 +1,21 @@
+<!-- templates/editlots.html -->
+<h2>Edit Parking Lots</h2>
+<ul>
+  {% for lot in lots %}
+    <li>
+      {{ lot.name }} - 
+      <a href="{{ url_for('editlot', lot_id=lot.id) }}">Edit</a> | 
+      <a href="{{ url_for('deletelot', lot_id=lot.id) }}">Delete</a>
+    </li>
+  {% endfor %}
+</ul>
+<a href="{{ url_for('dashboard') }}">🔙 Dashboard</a>
+
+<!-- Flash message -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <p style="color: green;">{{ message }}</p>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
