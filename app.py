@@ -23,6 +23,7 @@ class ParkingLot(db.Model):
     __tablename__ = 'parkinglots'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
+    landmark = db.Column(db.String(100), nullable=False)
     address = db.Column(db.String(200))
     pincode = db.Column(db.String(10))
     price = db.Column(db.Integer)
@@ -144,12 +145,13 @@ def addlot():
 
     if request.method == 'POST':
         name = request.form['name']
+        landmark = request.form['landmark']
         address = request.form['address']
         pincode = request.form['pincode']
         price = request.form['price']
         max_spots = int(request.form['max_spots'])
 
-        new_lot = ParkingLot(name=name, address=address, pincode=pincode, price=price, max_spots=max_spots)
+        new_lot = ParkingLot(name=name, landmark=landmark,address=address, pincode=pincode, price=price, max_spots=max_spots)
         db.session.add(new_lot)
         db.session.commit()
 
@@ -519,6 +521,7 @@ def admin_history():
             'username': user.username,
             'vehicle_number': user.vehicle_number,
             'lot_name': lot.name,
+            'place_number': place.number,
             'start_time': r.start_time,
             'end_time': r.end_time,
             'total_hours': total_hours,

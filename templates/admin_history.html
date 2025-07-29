@@ -22,6 +22,7 @@
                 <th>Username</th>
                 <th>Vehicle Number</th>
                 <th>Lot Name</th>
+                <th>place number</th>
                 <th>Start Time</th>
                 <th>End Time</th>
                 <th>Total Hours</th>
@@ -34,6 +35,7 @@
                 <td>{{ record.username }}</td>
                 <td>{{ record.vehicle_number }}</td>
                 <td>{{ record.lot_name }}</td>
+                <td>{{record.place_number}}</td>
                 <td>{{ record.start_time }}</td>
                 <td>{{ record.end_time }}</td>
                 <td>{{ record.total_hours }}</td>
@@ -41,7 +43,7 @@
             </tr>
             {% else %}
             <tr>
-                <td colspan="7">No history found.</td>
+                <td colspan="8">No history found.</td>
             </tr>
             {% endfor %}
         </tbody>
