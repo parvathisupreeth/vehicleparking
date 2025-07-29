@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from sqlalchemy import or_
+from flask import abort
 
 app = Flask(__name__)
 app.secret_key = 'boosss_secret_key'
@@ -268,37 +269,6 @@ def release_place(place_id):
 
 
 
-
-
-@app.route('/book/<int:lot_id>')
-def book(lot_id):
-    if 'user_id' not in session:
-        flash("⚠️ Login required to reserve.", "danger")
-        return redirect('/login')
-
-    place = Place.query.filter_by(lot_id=lot_id, is_reserved=False).first()
-
-    if place:
-        place.is_reserved = True
-        db.session.commit()
-
-        reservation = Reservation(
-            user_id=session['user_id'],
-            place_id=place.id,
-            start_time=datetime.now(),
-            cost_per_hour=ParkingLot.query.get(lot_id).price
-        )
-        db.session.add(reservation)
-        db.session.commit()
-
-        flash(f"✅ Booked Place {place.number} in Lot ID {lot_id}", "success")
-    else:
-        flash("❌ No available places in this lot.", "warning")
-
-    return redirect('/viewlots')
-
-
-
 @app.route('/history')
 def user_history():
     user_id = session.get('user_id')
@@ -490,7 +460,7 @@ def admin_analytics():
 
     return render_template('admin_analytics.html', lots=lots_data, search=search_query)
 
-from flask import abort
+
 
 @app.route('/admin/history')
 def admin_history():

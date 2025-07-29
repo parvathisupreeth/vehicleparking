@@ -3,27 +3,138 @@
 <head>
     <title>Admin - Parking Analytics</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
         input[type="search"] {
             margin-bottom: 10px;
             padding: 5px;
             width: 300px;
         }
-        table, th, td {
+        form {
+            margin-bottom: 20px;
+        }
+
+        .vertical-bargraph-container {
+            width: 90%;
+            margin: 30px auto 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .vertical-bargraph {
+            display: flex;
+            align-items: flex-end;
+            min-height: 250px;
+            margin: 0 auto;
+        }
+        .y-axis {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 200px;
+            margin-right: 12px;
+            font-size: 13px;
+        }
+        .y-tick {
+            height: 40px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-end;
+            padding-right: 6px;
+        }
+        .bars {
+            display: flex;
+            align-items: end;
+            gap: 26px;
+            height: 200px;
+        }
+        .bar-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .bar {
+            width: 36px;
+            border-radius: 8px 8px 0 0;
+            background: #1976d2;
+            transition: height 0.3s;
+        }
+        .x-label {
+            margin-top: 10px;
+            font-size: 13px;
+            width: 54px;
+            text-align: center;
+            word-break: break-word;
+        }
+
+        .pie-charts-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 38px;
+            width: 96%;
+            margin: 35px auto 20px auto;
+        }
+        .pie-chart {
+            border-radius: 50%;
+            margin: 0 auto 10px auto;
+            width: 100px;
+            height: 100px;
+            border: 3px solid #1976d2;
+            box-shadow: 0 2px 8px #4285f420;
+            background: conic-gradient(#43A047 0% 0%, #E0E0E0 0% 100%);
+        }
+        .pie-chart-text {
+            text-align: center;
+            font-size: 15px;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        .usage-table-container {
+            width: 90%;
+            margin: 0 auto 40px auto;
+            overflow-x: auto;
+        }
+        table {
             border: 1px solid black;
             border-collapse: collapse;
+            width: 100%;
+            margin: 0 auto;
+        }
+        th, td {
+            border: 1px solid black;
             padding: 8px 12px;
             text-align: left;
+            white-space: nowrap;
         }
         .usage-bar {
             background-color: #4CAF50;
             height: 15px;
             color: white;
             text-align: center;
+            line-height: 15px;
+            border-radius: 3px;
+            font-size: 12px;
         }
         .usage-container {
             width: 100px;
             border: 1px solid #ddd;
             background-color: #f5f5f5;
+            border-radius: 3px;
+        }
+        a {
+            text-decoration: none;
+            color: #007BFF;
+            margin-top: 20px;
+            display: inline-block;
+            font-size: 16px;
+        }
+        a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -39,45 +150,85 @@
     </form>
 
     {% if lots %}
-        <h3>Parking Lot Usage Summary</h3>
-        <ul>
-            {% for lot in lots %}
-                <li><strong>{{ lot.name }}</strong>: {{ lot.usage_percent }}% occupied ({{ lot.occupied }}/{{ lot.capacity }})</li>
-            {% endfor %}
-        </ul>
-
-        <h3>Parking Lots Details</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Location</th>
-                    <th>Capacity</th>
-                    <th>Available</th>
-                    <th>Cost per hour (₹)</th>
-                    <th>Usage %</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for lot in lots %}
-                <tr>
-                    <td>{{ lot.name }}</td>
-                    <td>{{ lot.location }}</td>
-                    <td>{{ lot.capacity }}</td>
-                    <td>{{ lot.available }}</td>
-                    <td>{{ lot.cost }}</td>
-                    <td>
-                        <div class="usage-container">
-                            <div class="usage-bar" style="width:{{ lot.usage_percent }}%;">{{ lot.usage_percent }}%</div>
+        <!-- ========== Vertical Bar Graph ========== -->
+        <div class="vertical-bargraph-container">
+            <h3>Active Reservations per Parking Lot</h3>
+            <div class="vertical-bargraph">
+                <div class="y-axis">
+                    {% set max_reserve = lots|map(attribute='occupied')|max %}
+                    {% for tick in range((max_reserve//5+1)*5, -1, -5) %}
+                        <div class="y-tick">{{ tick }}</div>
+                    {% endfor %}
+                </div>
+                <div class="bars">
+                    {% for lot in lots %}
+                        <div class="bar-item">
+                            <div class="bar"
+                                 style="height: calc({{ lot.occupied|float }} / {{ max_reserve|float }} * 200px);"
+                                 title="{{ lot.name }} - {{ lot.occupied }} active reservations"></div>
+                            <div class="x-label">{{ lot.name }}</div>
                         </div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== Pie Charts Row ========== -->
+        <div class="pie-charts-row">
+            {% for lot in lots %}
+                <div>
+                    <div class="pie-chart"
+                         style="background: conic-gradient(
+                             #43A047 0% {{ lot.usage_percent }}%,
+                             #E0E0E0 {{ lot.usage_percent }}% 100%
+                         );"
+                         title="{{ lot.name }}: {{ lot.usage_percent }}% occupied"></div>
+                    <div class="pie-chart-text">{{ lot.name }}</div>
+                    <div class="pie-chart-text" style="font-size:13px;font-weight:normal;">
+                        {{ lot.usage_percent }}%
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- ========== Table Section ========== -->
+        <div class="usage-table-container">
+            <h3>Parking Lots Details</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Location</th>
+                        <th>Capacity</th>
+                        <th>Available</th>
+                        <th>Cost per hour (₹)</th>
+                        <th>Usage %</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lot in lots %}
+                    <tr>
+                        <td>{{ lot.name }}</td>
+                        <td>{{ lot.location }}</td>
+                        <td>{{ lot.capacity }}</td>
+                        <td>{{ lot.available }}</td>
+                        <td>{{ lot.cost }}</td>
+                        <td>
+                            <div class="usage-container" aria-label="Usage {{ lot.usage_percent }}%">
+                                <div class="usage-bar" style="width:{{ lot.usage_percent }}%;">
+                                    {{ lot.usage_percent }}%
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     {% else %}
         <p>No parking lots found.</p>
     {% endif %}
-    <a href="{{ url_for('dashboard') }}">🔙  Dashboard</a>
+
+    <a href="{{ url_for('dashboard') }}">🔙 Dashboard</a>
 </body>
 </html>
