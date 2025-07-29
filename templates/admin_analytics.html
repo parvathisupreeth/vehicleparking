@@ -30,6 +30,7 @@
             min-height: 250px;
             margin: 0 auto;
         }
+        /*
         .y-axis {
             display: flex;
             flex-direction: column;
@@ -45,11 +46,15 @@
             justify-content: flex-end;
             padding-right: 6px;
         }
+        */
         .bars {
             display: flex;
             align-items: end;
             gap: 26px;
             height: 200px;
+            /* Expand bars container to horizontally fill space left by y-axis removal */
+            width: 100%;
+            justify-content: center;
         }
         .bar-item {
             display: flex;
@@ -154,13 +159,9 @@
         <div class="vertical-bargraph-container">
             <h3>Active Reservations per Parking Lot</h3>
             <div class="vertical-bargraph">
-                <div class="y-axis">
-                    {% set max_reserve = lots|map(attribute='occupied')|max %}
-                    {% for tick in range((max_reserve//5+1)*5, -1, -5) %}
-                        <div class="y-tick">{{ tick }}</div>
-                    {% endfor %}
-                </div>
+                <!-- y-axis removed to hide numbers -->
                 <div class="bars">
+                    {% set max_reserve = lots|map(attribute='occupied')|max %}
                     {% for lot in lots %}
                         <div class="bar-item">
                             <div class="bar"
@@ -179,8 +180,8 @@
                 <div>
                     <div class="pie-chart"
                          style="background: conic-gradient(
-                             #43A047 0% {{ lot.usage_percent }}%,
-                             #E0E0E0 {{ lot.usage_percent }}% 100%
+                            #43A047 0% {{ lot.usage_percent }}%,
+                            #E0E0E0 {{ lot.usage_percent }}% 100%
                          );"
                          title="{{ lot.name }}: {{ lot.usage_percent }}% occupied"></div>
                     <div class="pie-chart-text">{{ lot.name }}</div>
