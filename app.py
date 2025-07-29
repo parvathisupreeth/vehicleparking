@@ -17,6 +17,7 @@ class User(db.Model):
     password = db.Column(db.String(100), nullable=False)
     contact = db.Column(db.String(20), nullable=True)
     is_admin = db.Column(db.Boolean, default=False)
+    vehicle_number = db.Column(db.String(30), unique=True, nullable=False)
 
 class ParkingLot(db.Model):
     __tablename__ = 'parkinglots'
@@ -59,7 +60,7 @@ def default():
 def create_auto_admin():
     if_exists = User.query.filter_by(is_admin=True).first()
     if not if_exists:
-        admin = User(username='admin', password='passadmin', is_admin=True)
+        admin = User(username='admin', password='passadmin',vehicle_number='BOSSS_HERE', is_admin=True)
         db.session.add(admin)
         db.session.commit()
         print("admin got created")
@@ -102,6 +103,8 @@ def signup():
         username = request.form.get('username')
         password = request.form.get('password')
         contact = request.form.get('contact')
+        vehicle_number = request.form.get('vehicle_number')
+
 
 
         # Check if user already exists
@@ -111,7 +114,7 @@ def signup():
             return redirect(url_for('login')) # Redirect to login if user exists
 
         # By default, users are not admins unless assigned
-        new_user = User(username=username, password=password, contact=contact, is_admin=False)
+        new_user = User(username=username, password=password, contact=contact, vehicle_number=vehicle_number,is_admin=False)
         db.session.add(new_user)
         db.session.commit()
 
@@ -240,29 +243,25 @@ def release_place(place_id):
         return redirect(url_for('viewlots'))
 
     now = datetime.now()
-    duration = now - reservation.start_time
-    hours = duration.total_seconds() / 3600
-
-    # Minimum billing duration guard (15 minutes)
-    min_billable_hours = 0.25
-    if hours < min_billable_hours:
-        hours = min_billable_hours
+    duration_seconds = (now - reservation.start_time).total_seconds()
+    total_hours = round(duration_seconds / 3600, 2)
 
     cost_per_hour = reservation.cost_per_hour
     if cost_per_hour is None or cost_per_hour <= 0:
         flash("Lot price is invalid!", "danger")
         return redirect(url_for('viewlots'))
 
-    total_cost = round(hours * cost_per_hour, 2)
+    total_cost = round(total_hours * cost_per_hour, 2)
 
     # Update reservation and place status
     reservation.status = 'completed'
     reservation.end_time = now
     place.is_reserved = False
+    reservation.cost = total_cost
 
     db.session.commit()
 
-    flash(f"Spot released successfully! Total cost: ₹{total_cost}", "success")
+    flash(f"Spot released successfully! Total cost: ₹{reservation.cost}", "success")
     return redirect(url_for('viewlots'))
 
 
@@ -417,7 +416,7 @@ def admin_users():
     # Filter if search provided (case-insensitive)
     if search_query:
         search_pattern = f"%{search_query}%"
-        query = query.filter(or_(User.username.ilike(search_pattern), User.contact.ilike(search_pattern)))
+        query = query.filter(or_(User.username.ilike(search_pattern), User.contact.ilike(search_pattern),User.vehicle_number.ilike(search_pattern),))
 
     users = query.all()
 
@@ -436,6 +435,7 @@ def admin_users():
         user_list.append({
             'username': user.username,
             'contact': user.contact,
+            'vehicle_number': user.vehicle_number,
             'status': status,
             'total_hours': total_hours
         })
@@ -517,6 +517,7 @@ def admin_history():
 
         history_data.append({
             'username': user.username,
+            'vehicle_number': user.vehicle_number,
             'lot_name': lot.name,
             'start_time': r.start_time,
             'end_time': r.end_time,
