@@ -18,3 +18,7 @@ A web-based Parking Lot Management system built using **Flask**, **SQLite**, and
 
 ##  Folder Structure
 
+- app.py — main Flask app
+- templates/ — HTML templates (Jinja2)
+- static/ — CSS, JS, images
+- parking_lot.db — SQLite database
